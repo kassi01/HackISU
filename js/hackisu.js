@@ -14,11 +14,43 @@ function shuffle(array) {
   return array;
 }
 
+var letterObject = function(letter) {
+  this.letter = letter,
+  this.geometry = new THREE.BoxGeometry(60,60,60),
+  this.material = new THREE.MeshPhongMaterial({ map: THREE.ImageUtils.loadTexture('images/' + letter.toUpperCase() + '.gif') });
+  this.cube = new THREE.Mesh(this.geometry,this.material)
+};
+
+var words = ['walk', 'talk', 'author', 'autumn', 'august', 'daughter', 'caught', 'brought', 'thought', 'cough', 'laugh', 'enough'];
+var paddedWordLength = 10; // the number of letters to always offer for spelling a word
+shuffle(words);
+var numWords = words.length; // the number of assigned words to learn
+var lettersInWord = []; // the word to have the user spell, as an array of chars
+var possible = 'abcdefghijklmnopqrstuvwxyz'; // possible letters in a word
+var currentWordCubes = [];
+var min = 0;
+var max = numWords - 1;
+var randomIndex = Math.round(Math.random() * (max - min) + min);
+console.log(randomIndex);
+var wordLen = words[randomIndex].length; // words[randomIndex] is the current word to spell correctly
+for (var j = 0; j < wordLen; j++) {
+  lettersInWord.push(words[randomIndex].charAt(j));
+}
+var lengthDiff = (paddedWordLength - wordLen); // number of letters to add to reach paddedWordLength
+for (var k = 0; k < lengthDiff; k++) {
+  // add random letters to the letters available to choose
+  var tempChar = possible.charAt(Math.floor(Math.random() * possible.length));
+  lettersInWord.push(tempChar);
+}
+// and give the letters one last shuffle so they're random
+console.log(lettersInWord);
+shuffle(lettersInWord);
+console.log(lettersInWord);
+// lettersInWord is now an array of the characters in the word to spell, arranged randomly
 
 var colors = [0xff0000, 0x00ff00, 0x0000ff];
-var baseBoneRotation = (new THREE.Quaternion).setFromEuler(
-  new THREE.Euler(Math.PI / 2, 0, 0)
-);
+
+var baseBoneRotation = (new THREE.Quaternion).setFromEuler(new THREE.Euler(Math.PI / 2, 0, 0));
 
 Leap.loop({background: true}, {
   hand: function (hand) {
@@ -167,52 +199,21 @@ Leap.loop({background: true}, {
 
     scene.add(camera);
 
-    var letterObject = function(letter) {
-      this.letter = letter,
-      this.geometry = new THREE.CubeGeometry(60,60,60),
-      this.material = new THREE.MeshPhongMaterial({ map: THREE.ImageUtils.loadTexture('images/' + letter.toUpperCase() + '.gif') });
-      this.cube = new THREE.Mesh(this.geometry,this.material)
-    };
-
-    var words = ['walk', 'talk', 'author', 'autumn', 'august', 'daughter', 'caught', 'brought', 'thought', 'cough', 'laugh', 'enough'];
-    var paddedWordLength = 10; // the number of letters to always offer for spelling a word
-    shuffle(words);
-    var numWords = words.length; // the number of assigned words to learn
-    var lettersInWord = []; // the word to have the user spell, as an array of chars
-    var possible = 'abcdefghijklmnopqrstuvwxyz'; // possible letters in a word
-    for (var i = 0; i < numWords; i++) {
-      var wordLen = words[i].length; // words[i] is the current word to spell correctly
-      for (var j = 0; j < wordLen; j++) {
-        lettersInWord.push(words[i].charAt(j);
-      }
-      var lengthDiff = (paddedWordLength - wordLen); // number of letters to add to reach paddedWordLength
-      for (var k = 0; k < lengthDiff; k++) {
-        // add random letters to the letters available to choose
-        var tempChar = possible.charAt(Math.floor(Math.random() * possible.length));
-        lettersInWord.push(tempChar);
-      }
-      // and give the letters one last shuffle so they're random
-      shuffle(lettersInWord);
-      // lettersInWord is now an array of the characters in the word to spell, arranged randomly
-      // TODO each character in letterInWord needs to be a cube with that letter on it
-    }
+    // draw the cubes for the letters in lettersInWord[]
+    var cubesArray = [];
+    for (var m = 0; m < 10; m++) {
+      cubesArray[m] = new letterObject(lettersInWord[m]);
+      cubesArray[m].cube.position.set(5 * (0.5 - Math.random()), 200 * (0.5 - Math.random()), 400 * (0.5 - Math.random()));
+      cubesArray[m].cube.castShadow = true;
+      cubesArray[m].cube.receiveShadow = false;
+      scene.add(cubesArray[m].cube);
+    } 
     
-    cubeA.position.set(150,150,150);
-    cubeA.castShadow = true;
-    cubeA.receiveShadow = false;
-    scene.add(cubeA);
 
-    cubeB.position.set(75,75,75);
-    cubeB.castShadow = true;
-    cubeB.receiveShadow = false;
-    scene.add(cubeB);
-
-    cubeC.position.set(0,0,0);
-    cubeC.castShadow = true;
-    cubeC.receiveShadow = false;
-    scene.add(cubeC);
 
     renderer.render(scene, camera);
-    };
+};
 
-    initScene();
+
+
+initScene();
