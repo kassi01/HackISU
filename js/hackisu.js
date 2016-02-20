@@ -1,3 +1,20 @@
+// shuffles the contents of an array using 
+// https://en.wikipedia.org/wiki/Fisher-Yates_shuffle
+function shuffle(array) {
+  var currentIndex = array.length, temporaryValue, randomIndex;
+  while (0 !== currentIndex) {
+    // Pick a remaining element...
+    randomIndex = Math.floor(Math.random() * currentIndex);
+    currentIndex -= 1;
+    // And swap it with the current element.
+    temporaryValue = array[currentIndex];
+    array[currentIndex] = array[randomIndex];
+    array[randomIndex] = temporaryValue;
+  }
+  return array;
+}
+
+
 var colors = [0xff0000, 0x00ff00, 0x0000ff];
 var baseBoneRotation = (new THREE.Quaternion).setFromEuler(
   new THREE.Euler(Math.PI / 2, 0, 0)
@@ -158,30 +175,28 @@ Leap.loop({background: true}, {
     };
 
     var words = ['walk', 'talk', 'author', 'autumn', 'august', 'daughter', 'caught', 'brought', 'thought', 'cough', 'laugh', 'enough'];
-    var paddedLength = 10;
-    var numWords = words.length;
+    var paddedWordLength = 10; // the number of letters to always offer for spelling a word
+    shuffle(words);
+    var numWords = words.length; // the number of assigned words to learn
+    var lettersInWord = []; // the word to have the user spell, as an array of chars
+    var possible = 'abcdefghijklmnopqrstuvwxyz'; // possible letters in a word
     for (var i = 0; i < numWords; i++) {
-      var wordLen = words[i].length;
+      var wordLen = words[i].length; // words[i] is the current word to spell correctly
       for (var j = 0; j < wordLen; j++) {
-        // add letter from the word to the letters available to choose
+        lettersInWord.push(words[i].charAt(j);
       }
-      var lengthDiff = (paddedLength - wordLen);
+      var lengthDiff = (paddedWordLength - wordLen); // number of letters to add to reach paddedWordLength
       for (var k = 0; k < lengthDiff; k++) {
         // add random letters to the letters available to choose
+        var tempChar = possible.charAt(Math.floor(Math.random() * possible.length));
+        lettersInWord.push(tempChar);
       }
+      // and give the letters one last shuffle so they're random
+      shuffle(lettersInWord);
+      // lettersInWord is now an array of the characters in the word to spell, arranged randomly
+      // TODO each character in letterInWord needs to be a cube with that letter on it
     }
     
-    var geometryA = new THREE.CubeGeometry(60, 60, 60);
-    var geometryB = new THREE.CubeGeometry(60, 60, 60);
-    var geometryC = new THREE.CubeGeometry(60, 60, 60);
-    var materialA = new THREE.MeshPhongMaterial({ map: THREE.ImageUtils.loadTexture('images/A.gif') });
-    var materialB = new THREE.MeshPhongMaterial({ map: THREE.ImageUtils.loadTexture('images/B.gif') });
-    var materialC = new THREE.MeshPhongMaterial({ map: THREE.ImageUtils.loadTexture('images/C.gif') });
-    
-    var cubeA = new THREE.Mesh(geometryA, materialA);
-    var cubeB = new THREE.Mesh(geometryB, materialB);
-    var cubeC = new THREE.Mesh(geometryC, materialC);
-
     cubeA.position.set(150,150,150);
     cubeA.castShadow = true;
     cubeA.receiveShadow = false;
