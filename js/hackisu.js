@@ -138,7 +138,7 @@ Leap.loop({background: true}, {
     window.scene.add(directionalLight);
 
     window.camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 1000);
-    window.camera.position.fromArray([0, 100, 500]);
+    window.camera.position.fromArray([0, 400, 500]);
     window.camera.lookAt(new THREE.Vector3(0, 160, 0));
 
     window.addEventListener('resize', function () {
@@ -152,9 +152,11 @@ Leap.loop({background: true}, {
 
     // single cube
     // .loadTexture('') should point to the image for this letter
-    var geometry = new THREE.CubeGeometry(30, 45, 10);
-    var material = new THREE.MeshPhongMaterial({ map: THREE.ImageUtils.loadTexture('images/crate.jpg') });
+    var geometry = new THREE.CubeGeometry(90, 90, 90);
+    var material = new THREE.MeshPhongMaterial({ map: THREE.ImageUtils.loadTexture('images/A.gif') });
     window.cube = new THREE.Mesh(geometry, material);
+
+
     cube.position.set(0,0,0);
     cube.castShadow = true;
     cube.receiveShadow = true;
@@ -166,8 +168,8 @@ Leap.loop({background: true}, {
     initScene();
 
     var rotateCube = function() {
-      cube.rotation.x += 0.01;
-      cube.rotation.y += 0.02;
+      cube.rotation.x += 0.001;
+      cube.rotation.y += 0.001;
       renderer.render(scene, camera);
       window.requestAnimationFrame(rotateCube);
     };
