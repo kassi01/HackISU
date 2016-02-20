@@ -150,29 +150,54 @@ Leap.loop({background: true}, {
 
     scene.add(camera);
 
-    // single cube
-    // .loadTexture('') should point to the image for this letter
-    var geometry = new THREE.CubeGeometry(90, 90, 90);
-    var material = new THREE.MeshPhongMaterial({ map: THREE.ImageUtils.loadTexture('images/A.gif') });
-    window.cube = new THREE.Mesh(geometry, material);
+    var letterObject = function(letter) {
+      this.letter = letter,
+      this.geometry = new THREE.CubeGeometry(60,60,60),
+      this.material = new THREE.MeshPhongMaterial({ map: THREE.ImageUtils.loadTexture('images/' + letter.toUpperCase() + '.gif') });
+      this.cube = new THREE.Mesh(this.geometry,this.material)
+    };
 
+    var words = ['walk', 'talk', 'author', 'autumn', 'august', 'daughter', 'caught', 'brought', 'thought', 'cough', 'laugh', 'enough'];
+    var paddedLength = 10;
+    var numWords = words.length;
+    for (var i = 0; i < numWords; i++) {
+      var wordLen = words[i].length;
+      for (var j = 0; j < wordLen; j++) {
+        // add letter from the word to the letters available to choose
+      }
+      var lengthDiff = (paddedLength - wordLen);
+      for (var k = 0; k < lengthDiff; k++) {
+        // add random letters to the letters available to choose
+      }
+    }
+    
+    var geometryA = new THREE.CubeGeometry(60, 60, 60);
+    var geometryB = new THREE.CubeGeometry(60, 60, 60);
+    var geometryC = new THREE.CubeGeometry(60, 60, 60);
+    var materialA = new THREE.MeshPhongMaterial({ map: THREE.ImageUtils.loadTexture('images/A.gif') });
+    var materialB = new THREE.MeshPhongMaterial({ map: THREE.ImageUtils.loadTexture('images/B.gif') });
+    var materialC = new THREE.MeshPhongMaterial({ map: THREE.ImageUtils.loadTexture('images/C.gif') });
+    
+    var cubeA = new THREE.Mesh(geometryA, materialA);
+    var cubeB = new THREE.Mesh(geometryB, materialB);
+    var cubeC = new THREE.Mesh(geometryC, materialC);
 
-    cube.position.set(0,0,0);
-    cube.castShadow = true;
-    cube.receiveShadow = true;
-    scene.add(cube);
+    cubeA.position.set(150,150,150);
+    cubeA.castShadow = true;
+    cubeA.receiveShadow = false;
+    scene.add(cubeA);
+
+    cubeB.position.set(75,75,75);
+    cubeB.castShadow = true;
+    cubeB.receiveShadow = false;
+    scene.add(cubeB);
+
+    cubeC.position.set(0,0,0);
+    cubeC.castShadow = true;
+    cubeC.receiveShadow = false;
+    scene.add(cubeC);
 
     renderer.render(scene, camera);
     };
 
     initScene();
-
-    var rotateCube = function() {
-      cube.rotation.x += 0.001;
-      cube.rotation.y += 0.001;
-      renderer.render(scene, camera);
-      window.requestAnimationFrame(rotateCube);
-    };
-  
-    rotateCube();
-
