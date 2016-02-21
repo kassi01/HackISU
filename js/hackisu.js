@@ -14,6 +14,8 @@ function shuffle(array) {
   return array;
 }
 
+var cubesArray = [];
+
 var letterObject = function(letter) {
   this.letter = letter,
   this.geometry = new THREE.BoxGeometry(60,60,60),
@@ -33,6 +35,7 @@ var max = numWords - 1;
 var randomIndex = Math.round(Math.random() * (max - min) + min);
 console.log(randomIndex);
 var wordLen = words[randomIndex].length; // words[randomIndex] is the current word to spell correctly
+console.log('The word is ' + words[randomIndex]);
 for (var j = 0; j < wordLen; j++) {
   lettersInWord.push(words[randomIndex].charAt(j));
 }
@@ -45,15 +48,18 @@ for (var k = 0; k < lengthDiff; k++) {
 // and give the letters one last shuffle so they're random
 console.log(lettersInWord);
 shuffle(lettersInWord);
-console.log(lettersInWord);
 // lettersInWord is now an array of the characters in the word to spell, arranged randomly
 
 var colors = [0xff0000, 0x00ff00, 0x0000ff];
 
 var baseBoneRotation = (new THREE.Quaternion).setFromEuler(new THREE.Euler(Math.PI / 2, 0, 0));
 
-Leap.loop({background: true}, {
-  hand: function (hand) {
+Leap.loop(
+  {background: true}, 
+  
+  // the hand
+  {hand: function (hand) {
+  // the fingers
   hand.fingers.forEach(function (finger) {
     // position the cylinders of the hand every frame
     finger.data('boneMeshes').forEach(function(mesh, i) {
@@ -65,25 +71,22 @@ Leap.loop({background: true}, {
     mesh.quaternion.multiply(baseBoneRotation);
     });
 
-  finger.data('jointMeshes').forEach(function(mesh, i) {
-    var bone = finger.bones[i];
-    if (bone) {
-      mesh.position.fromArray(bone.prevJoint);
-    } else {
-      // special case for the finger tip joint sphere:
-      bone = finger.bones[i-1];
-      mesh.position.fromArray(bone.nextJoint);
-    }
-  });
-  
+    finger.data('jointMeshes').forEach(function(mesh, i) {
+      var bone = finger.bones[i];
+      if (bone) {
+        mesh.position.fromArray(bone.prevJoint);
+      } else {
+        // special case for the finger tip joint sphere:
+        bone = finger.bones[i-1];
+        mesh.position.fromArray(bone.nextJoint);
+      }
+    });
   });
 
   // the arm
   var armMesh = hand.data('armMesh');
   armMesh.position.fromArray(hand.arm.center());
-  armMesh.setRotationFromMatrix(
-    (new THREE.Matrix4).fromArray( hand.arm.matrix() )
-  );
+  armMesh.setRotationFromMatrix((new THREE.Matrix4).fromArray(hand.arm.matrix()));
   armMesh.quaternion.multiply(baseBoneRotation);
   armMesh.scale.x = hand.arm.width / 2;
   armMesh.scale.z = hand.arm.width / 4;
@@ -166,6 +169,35 @@ Leap.loop({background: true}, {
   })
   .connect();
 
+  var controller = Leap.loop({enableGestures: true}, function(frame) {
+    if (frame.valid && frame.gestures.length > 0) {
+      frame.gestures.forEach(function(gesture) {
+        if (typeof gesture !== 'undefined') {
+          if (gesture.type === 'keyTap') {
+            console.log('gesture', gesture);
+            var projector = new THREE.Projector();
+            var lm_vector = new THREE.Vector3();
+            if (typeof gesture.position !== 'undefined') {
+              console.log(gesture.position);
+              // TODO now that we have this position from the keytap we can see if that's on the same space as a block
+
+              // this is the way it's *supposed* to be done but hackathon rules are in effect
+              // we don't really care where the block is, we care which one it is
+              var raycaster = new THREE.Raycaster();
+              raycaster.setFromCamera(gesture.position, camera);
+              var intersects = raycaster.intersectObjects(scene.children);
+              //console.log('raycaster',raycaster);
+              //console.log('intersects',intersects);
+              //
+            }
+          }
+        }
+      });
+    }
+  });
+
+  
+  
   var initScene = function () {
     window.scene = new THREE.Scene();
     window.renderer = new THREE.WebGLRenderer({
@@ -188,7 +220,7 @@ Leap.loop({background: true}, {
 
     window.camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 1000);
     window.camera.position.fromArray([0, 400, 500]);
-    window.camera.lookAt(new THREE.Vector3(0, 160, 0));
+    window.camera.lookAt(new THREE.Vector3(0, 0, 0));
 
     window.addEventListener('resize', function () {
       camera.aspect = window.innerWidth / window.innerHeight;
@@ -200,20 +232,27 @@ Leap.loop({background: true}, {
     scene.add(camera);
 
     // draw the cubes for the letters in lettersInWord[]
-    var cubesArray = [];
+
+    var range = 400;
     for (var m = 0; m < 10; m++) {
       cubesArray[m] = new letterObject(lettersInWord[m]);
-      cubesArray[m].cube.position.set(5 * (0.5 - Math.random()), 200 * (0.5 - Math.random()), 400 * (0.5 - Math.random()));
+      cubesArray[m].cube.position.set(range * (0.5 - Math.random()), range * (0.5 - Math.random()), range * (0.5 - Math.random()));
       cubesArray[m].cube.castShadow = true;
       cubesArray[m].cube.receiveShadow = false;
       scene.add(cubesArray[m].cube);
     } 
-    
 
 
+    var render = function () {
+      requestAnimationFrame(render);
+      var numCubes = cubesArray.length;
+      for (var n = 0; n < numCubes; n++) {
+        cubesArray[n].cube.rotation.x += 0.001;
+        cubesArray[n].cube.rotation.y += 0.001;
+      }
     renderer.render(scene, camera);
+    };
+    render();
 };
-
-
 
 initScene();
