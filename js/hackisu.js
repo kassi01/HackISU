@@ -33,9 +33,9 @@ var currentWordCubes = [];
 var min = 0;
 var max = numWords - 1;
 var randomIndex = Math.round(Math.random() * (max - min) + min);
-//console.log(randomIndex);
+console.log(randomIndex);
 var wordLen = words[randomIndex].length; // words[randomIndex] is the current word to spell correctly
-var wordMessage = 'The word is ' + words[randomIndex];
+var wordMessage = 'The word is ,,' + words[randomIndex];
 var msg = new SpeechSynthesisUtterance();
 msg.volume = 4; // 0 to 1
 msg.rate = 2; // 0.1 to 10
@@ -209,7 +209,6 @@ Leap.loop(
                 var zDiff = Math.abs(gesture.position[2] - cubesArray[z].cube.position.z);
                 if (xDiff <= 70 && yDiff <= 70 && zDiff <= 70) {
                   console.log('letter ' + cubesArray[z].letter);
-                  //say(cubesArray[z].letter);
                   var msg = new SpeechSynthesisUtterance(cubesArray[z].letter);
                   window.speechSynthesis.speak(msg);
                 }
