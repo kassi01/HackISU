@@ -35,7 +35,12 @@ var max = numWords - 1;
 var randomIndex = Math.round(Math.random() * (max - min) + min);
 //console.log(randomIndex);
 var wordLen = words[randomIndex].length; // words[randomIndex] is the current word to spell correctly
-console.log('The word is ' + words[randomIndex]);
+var wordMessage = 'The word is ' + words[randomIndex];
+var msg = new SpeechSynthesisUtterance();
+msg.volume = 4; // 0 to 1
+msg.rate = 2; // 0.1 to 10
+msg.pitch = 2; //0 to 2
+window.speechSynthesis.speak(msg);
 for (var j = 0; j < wordLen; j++) {
   lettersInWord.push(words[randomIndex].charAt(j));
 }
@@ -204,24 +209,17 @@ Leap.loop(
                 var zDiff = Math.abs(gesture.position[2] - cubesArray[z].cube.position.z);
                 if (xDiff <= 70 && yDiff <= 70 && zDiff <= 70) {
                   console.log('letter ' + cubesArray[z].letter);
-                  say(cubesArray[z].letter);
+                  //say(cubesArray[z].letter);
+                  var msg = new SpeechSynthesisUtterance(cubesArray[z].letter);
+                  window.speechSynthesis.speak(msg);
                 }
               }
-
-              // --------------
-
-              //console.log('camera',camera);
-
-              //console.log('intersects',intersects);
-              //
             }
           }
         }
       });
     }
   });
-
-  
   
   var initScene = function () {
     window.scene = new THREE.Scene();
@@ -262,20 +260,19 @@ Leap.loop(
     for (var m = 0; m < 10; m++) {
       cubesArray[m] = new letterObject(lettersInWord[m]);
       cubesArray[m].cube.position.set(range * (0.5 - Math.random()), range * (0.5 - Math.random()), 0);
-      console.log('letter is ',m);
-     // console.log('position of block is ',cubesArray[m].cube.position);
       cubesArray[m].cube.castShadow = true;
       cubesArray[m].cube.receiveShadow = false;
       scene.add(cubesArray[m].cube);
     } 
 
-
     var render = function () {
       requestAnimationFrame(render);
       var numCubes = cubesArray.length;
       for (var n = 0; n < numCubes; n++) {
-        cubesArray[n].cube.rotation.x += 0.001;
-        cubesArray[n].cube.rotation.y += 0.001;
+        cubesArray[n].cube.rotation.x += 0.01;
+        cubesArray[n].cube.rotation.y += 0.01;
+        cubesArray[n].cube.position.x += 0.002;
+        cubesArray[n].cube.position.y += 0.003;
       }
     renderer.render(scene, camera);
     };
