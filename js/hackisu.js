@@ -18,7 +18,7 @@ var cubesArray = [];
 
 var letterObject = function(letter) {
   this.letter = letter,
-  this.geometry = new THREE.BoxGeometry(60,60,60),
+  this.geometry = new THREE.BoxGeometry(75,75,75),
   this.material = new THREE.MeshPhongMaterial({ map: THREE.ImageUtils.loadTexture('images/' + letter.toUpperCase() + '.gif') });
   this.cube = new THREE.Mesh(this.geometry,this.material)
 };
@@ -33,7 +33,7 @@ var currentWordCubes = [];
 var min = 0;
 var max = numWords - 1;
 var randomIndex = Math.round(Math.random() * (max - min) + min);
-console.log(randomIndex);
+//console.log(randomIndex);
 var wordLen = words[randomIndex].length; // words[randomIndex] is the current word to spell correctly
 console.log('The word is ' + words[randomIndex]);
 for (var j = 0; j < wordLen; j++) {
@@ -46,7 +46,7 @@ for (var k = 0; k < lengthDiff; k++) {
   lettersInWord.push(tempChar);
 }
 // and give the letters one last shuffle so they're random
-console.log(lettersInWord);
+//console.log(lettersInWord);
 shuffle(lettersInWord);
 // lettersInWord is now an array of the characters in the word to spell, arranged randomly
 
@@ -173,20 +173,45 @@ Leap.loop(
     if (frame.valid && frame.gestures.length > 0) {
       frame.gestures.forEach(function(gesture) {
         if (typeof gesture !== 'undefined') {
-          if (gesture.type === 'keyTap') {
-            console.log('gesture', gesture);
+          if (gesture.type === 'keyTap' || gesture.type === 'screenTap') {
+            console.log('gesture', gesture.type);
             var projector = new THREE.Projector();
             var lm_vector = new THREE.Vector3();
             if (typeof gesture.position !== 'undefined') {
-              console.log(gesture.position);
               // TODO now that we have this position from the keytap we can see if that's on the same space as a block
+              // ultimately we don't really care *where* the block is, we care *which one* it is (technically, which letter is on it)
+              
+              // if we're here we keytapped
+              // block positions are in cubesArray[].position
+              
+              for (var z = 0; z < cubesArray.length; z++) {
+                var keyTap = new THREE.Vector2();
+                keyTap.x = gesture.position[0];
+                keyTap.y = gesture.position[1];
+                
+                var keyTapDir = new THREE.Vector2()
+                keyTapDir.x = gesture.direction[0];
+                keyTapDir.y = gesture.direction[1];
 
-              // this is the way it's *supposed* to be done but hackathon rules are in effect
-              // we don't really care where the block is, we care which one it is
-              var raycaster = new THREE.Raycaster();
-              raycaster.setFromCamera(gesture.position, camera);
-              var intersects = raycaster.intersectObjects(scene.children);
-              //console.log('raycaster',raycaster);
+                var raycaster = new THREE.Raycaster();
+                raycaster.set(keyTap,keyTapDir);
+
+                var intersects = raycaster.intersectObject(cubesArray[z].cube);
+                //console.log('raycaster',raycaster);
+                //console.log('interects',intersects);
+                var xDiff = Math.abs(gesture.position[0] - cubesArray[z].cube.position.x);
+                var yDiff = Math.abs(gesture.position[1] - cubesArray[z].cube.position.y);
+                var zDiff = Math.abs(gesture.position[2] - cubesArray[z].cube.position.z);
+                if (xDiff <= 70 && yDiff <= 70 && zDiff <= 70) {
+                  console.log('letter ' + cubesArray[z].letter);
+                  say(cubesArray[z].letter);
+                }
+              }
+
+              // --------------
+
+              //console.log('camera',camera);
+
               //console.log('intersects',intersects);
               //
             }
@@ -236,7 +261,9 @@ Leap.loop(
     var range = 400;
     for (var m = 0; m < 10; m++) {
       cubesArray[m] = new letterObject(lettersInWord[m]);
-      cubesArray[m].cube.position.set(range * (0.5 - Math.random()), range * (0.5 - Math.random()), range * (0.5 - Math.random()));
+      cubesArray[m].cube.position.set(range * (0.5 - Math.random()), range * (0.5 - Math.random()), 0);
+      console.log('letter is ',m);
+     // console.log('position of block is ',cubesArray[m].cube.position);
       cubesArray[m].cube.castShadow = true;
       cubesArray[m].cube.receiveShadow = false;
       scene.add(cubesArray[m].cube);
