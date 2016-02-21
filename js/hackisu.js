@@ -35,11 +35,10 @@ var max = numWords - 1;
 var randomIndex = Math.round(Math.random() * (max - min) + min);
 console.log(randomIndex);
 var wordLen = words[randomIndex].length; // words[randomIndex] is the current word to spell correctly
-var wordMessage = 'The word is ,,' + words[randomIndex];
-var msg = new SpeechSynthesisUtterance();
-msg.volume = 4; // 0 to 1
-msg.rate = 2; // 0.1 to 10
-msg.pitch = 2; //0 to 2
+var currentWord = '';
+var targetWord = words[randomIndex];
+var wordMessage = 'The word is ,,' + targetWord + ',, Tap your finger on the letters to spell ,,' + targetWord;
+var msg = new SpeechSynthesisUtterance(wordMessage);
 window.speechSynthesis.speak(msg);
 for (var j = 0; j < wordLen; j++) {
   lettersInWord.push(words[randomIndex].charAt(j));
@@ -58,6 +57,8 @@ shuffle(lettersInWord);
 var colors = [0xff0000, 0x00ff00, 0x0000ff];
 
 var baseBoneRotation = (new THREE.Quaternion).setFromEuler(new THREE.Euler(Math.PI / 2, 0, 0));
+
+var currentSelectedWord = []; // this is the word that's in the process of being spelled
 
 Leap.loop(
   {background: true}, 
@@ -186,7 +187,7 @@ Leap.loop(
               // TODO now that we have this position from the keytap we can see if that's on the same space as a block
               // ultimately we don't really care *where* the block is, we care *which one* it is (technically, which letter is on it)
               
-              // if we're here we keytapped
+              // if we're here we keytapped or screentapped
               // block positions are in cubesArray[].position
               
               for (var z = 0; z < cubesArray.length; z++) {
@@ -204,13 +205,25 @@ Leap.loop(
                 var intersects = raycaster.intersectObject(cubesArray[z].cube);
                 //console.log('raycaster',raycaster);
                 //console.log('interects',intersects);
+
+                // this is hackish and I'm sorry. It allows selecting letters though.
                 var xDiff = Math.abs(gesture.position[0] - cubesArray[z].cube.position.x);
                 var yDiff = Math.abs(gesture.position[1] - cubesArray[z].cube.position.y);
                 var zDiff = Math.abs(gesture.position[2] - cubesArray[z].cube.position.z);
                 if (xDiff <= 70 && yDiff <= 70 && zDiff <= 70) {
+                  // we tapped on a valid letter block and selected a letter
                   console.log('letter ' + cubesArray[z].letter);
-                  var msg = new SpeechSynthesisUtterance(cubesArray[z].letter);
+                  // give some feedback and speak the letter that was selected
+                  var msgText = 'Selected letter, ' + cubesArray[z].letter;
+                  var msg = new SpeechSynthesisUtterance(msgText);
                   window.speechSynthesis.speak(msg);
+                  // add the selected letter to the currently being spelled word
+                  currentWord += cubesArray[z].letter;
+                  if (currentWord.length >= targetWord.length) {
+                        var msgText = 'The word you entered sounds like,,, ' + currentWord + ' ,,and the correct word is ' + targetWord + '.';
+                        var msg = new SpeechSynthesisUtterance(msgText);
+                        window.speechSynthesis.speak(msg);
+                  } 
                 }
               }
             }
