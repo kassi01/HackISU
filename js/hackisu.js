@@ -306,12 +306,8 @@ Leap.loop(
       requestAnimationFrame(render);
       var numCubes = cubesArray.length;
       for (var n = 0; n < numCubes; n++) {
-        cubesArray[n].cube.rotation.x += 0.01;
-        cubesArray[n].cube.rotation.y += 0.01;
-      }
-      for (var n = 0; n < numCubes; n++) {
-        cubesArray[n].cube.rotation.x -= 0.01;
-        cubesArray[n].cube.rotation.y -= 0.01;
+        cubesArray[n].cube.rotation.x += 0.001;
+        cubesArray[n].cube.rotation.y += 0.001;
       }
     renderer.render(scene, camera);
     };
