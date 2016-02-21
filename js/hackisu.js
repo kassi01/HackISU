@@ -15,10 +15,13 @@ function shuffle(array) {
 }
 
 var cubesArray = [];
+var CUBE_SIZE_X = 50;
+var CUBE_SIZE_Y = 50;
+var CUBE_SIZE_Z = 50;
 
 var letterObject = function(letter) {
   this.letter = letter,
-  this.geometry = new THREE.BoxGeometry(75,75,75),
+  this.geometry = new THREE.BoxGeometry(CUBE_SIZE_X,CUBE_SIZE_Y,CUBE_SIZE_Z),
   this.material = new THREE.MeshPhongMaterial({ map: THREE.ImageUtils.loadTexture('images/' + letter.toUpperCase() + '.gif') });
   this.cube = new THREE.Mesh(this.geometry,this.material)
 };
@@ -224,6 +227,7 @@ Leap.loop(
                         var msg = new SpeechSynthesisUtterance(msgText);
                         window.speechSynthesis.speak(msg);
                   } 
+                  // TODO something useful should happen once we've either won or lost the game for a single word
                 }
               }
             }
@@ -267,11 +271,32 @@ Leap.loop(
     scene.add(camera);
 
     // draw the cubes for the letters in lettersInWord[]
+    
+    var MAX_LETTERS = 10;
 
-    var range = 400;
-    for (var m = 0; m < 10; m++) {
+    var BlockPosition = function (x,y,z) {
+      this.x = x;
+      this.y = y;
+      this.z = z;
+    };
+
+    var blockPositions = [];
+    // hackathon hacker sunday morning privs envoked here
+    blockPositions.push(new BlockPosition(-360,200,0));
+    blockPositions.push(new BlockPosition(-300,200,0));
+    blockPositions.push(new BlockPosition(-240,200,0));
+    blockPositions.push(new BlockPosition(-180,200,0));
+    blockPositions.push(new BlockPosition(-120,200,0));
+    blockPositions.push(new BlockPosition(-60,200,0));
+    blockPositions.push(new BlockPosition(0,200,0));
+    blockPositions.push(new BlockPosition(60,200,0));
+    blockPositions.push(new BlockPosition(120,200,0));
+    blockPositions.push(new BlockPosition(180,200,0));
+
+    console.log(window.innerWidth, window.innerHeight);
+    for (var m = 0; m < MAX_LETTERS; m++) {
       cubesArray[m] = new letterObject(lettersInWord[m]);
-      cubesArray[m].cube.position.set(range * (0.5 - Math.random()), range * (0.5 - Math.random()), 0);
+      cubesArray[m].cube.position.set(blockPositions[m].x,blockPositions[m].y,blockPositions[m].z);
       cubesArray[m].cube.castShadow = true;
       cubesArray[m].cube.receiveShadow = false;
       scene.add(cubesArray[m].cube);
@@ -283,8 +308,10 @@ Leap.loop(
       for (var n = 0; n < numCubes; n++) {
         cubesArray[n].cube.rotation.x += 0.01;
         cubesArray[n].cube.rotation.y += 0.01;
-        cubesArray[n].cube.position.x += 0.002;
-        cubesArray[n].cube.position.y += 0.003;
+      }
+      for (var n = 0; n < numCubes; n++) {
+        cubesArray[n].cube.rotation.x -= 0.01;
+        cubesArray[n].cube.rotation.y -= 0.01;
       }
     renderer.render(scene, camera);
     };
